@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[PostNr] (
+    [PostNrID]   BIGINT IDENTITY (1, 1) NOT NULL,
+    [PostNumber] INT    NOT NULL,
+    [CountryID] BIGINT NOT NULL,
+    CONSTRAINT [pk_PostNr] PRIMARY KEY CLUSTERED ([PostNrID] ASC),
+    CONSTRAINT [fk_PostNr] FOREIGN KEY ([CountryID]) REFERENCES [dbo].[Country] ([CountryID]) ON DELETE CASCADE ON UPDATE CASCADE
+);
+

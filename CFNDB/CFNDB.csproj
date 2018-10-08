@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C923FD08-EDEB-477D-8E39-E130798E519E}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{C2943DDD-4051-4C56-BEDD-7D06C7C20E42}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RDB.DomainModels</RootNamespace>
-    <AssemblyName>RDB.DomainModels</AssemblyName>
+    <RootNamespace>ApplicationLogic</RootNamespace>
+    <AssemblyName>ApplicationLogic</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,6 +29,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
@@ -38,6 +41,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,38 +51,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\201810061849417_InitialCreate.cs" />
-    <Compile Include="Migrations\201810061849417_InitialCreate.Designer.cs">
-      <DependentUpon>201810061849417_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201810061912466_InitialMigration.cs" />
-    <Compile Include="Migrations\201810061912466_InitialMigration.Designer.cs">
-      <DependentUpon>201810061912466_InitialMigration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\Address.cs" />
-    <Compile Include="Models\AlternativeAddress.cs" />
-    <Compile Include="Models\City.cs" />
-    <Compile Include="Models\Country.cs" />
-    <Compile Include="Models\Person.cs" />
-    <Compile Include="Models\PostNr.cs" />
-    <Compile Include="Models\Provider.cs" />
-    <Compile Include="Models\Telefon.cs" />
-    <Compile Include="PersonkartotekContext.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="ClassDiagram\ClassDiagram.cd" />
-    <None Include="packages.config" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj">
+      <Project>{f1d4ce5f-0807-4ec3-a2b2-5d7ecb40343e}</Project>
+      <Name>Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RDB.DomainModels\RDB.DomainModels.csproj">
+      <Project>{c923fd08-edeb-477d-8e39-e130798e519e}</Project>
+      <Name>RDB.DomainModels</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201810061849417_InitialCreate.resx">
-      <DependentUpon>201810061849417_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201810061912466_InitialMigration.resx">
-      <DependentUpon>201810061912466_InitialMigration.cs</DependentUpon>
-    </EmbeddedResource>
+    <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
