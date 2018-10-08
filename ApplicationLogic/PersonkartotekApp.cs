@@ -21,7 +21,7 @@ namespace ApplicationLogic
 
 
 
-            Person person1 = new Person() { FirstName = "Imal", MiddleName = "", LastName = "Hashimi", Email = "201608168@uni.au.dk ", Notes = "He is a student at IHA" };
+            Person person1 = new Person() { FirstName = "Barak", MiddleName = "", LastName = "Obama", Email = "12342018@yahoo.com ", Notes = "He is a student at IHA" };
             personUtil.CreatePersonDB(ref person1);
             personUtil.GetPersonByName(ref person1);
 

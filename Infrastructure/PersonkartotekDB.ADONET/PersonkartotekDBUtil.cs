@@ -1,4 +1,5 @@
 ﻿using RDB.DomainModels.Models;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
@@ -371,72 +372,83 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 AlternativeAddress ON Person.PersonID = AlternativeAddress.Person
                 Address ON Person.PersonID = Address.Person
                 WHERE   (Person.PersonID = @PersonId)";
-            using (var cmd = new SqlCommand(fullPersonkartotek, OpenConnection))
+
+            try
             {
-                cmd.Parameters.AddWithValue("@PersonId", fcpt.PersonID);
-                SqlDataReader rdr = null;
-                rdr = cmd.ExecuteReader();
-                var personCount = 0;
-                var addressCount = 0;
-                var altAddressCount = 0;
-                int personid = 0;
-                int addid = 0;
-
-                Person person = new Person();
-                Address address = null;
-
-                person.PrimaryAddress = new Address { };
-                person.AlternativeAddresses = new List<AlternativeAddress>() { };
-                while (rdr.Read())
+                using (var cmd = new SqlCommand(fullPersonkartotek, OpenConnection))
                 {
-                    var pid = (int)rdr["PersonId"];
-                    if (personid != pid) //Hent root Person
+                    cmd.Parameters.AddWithValue("@PersonId", fcpt.PersonID);
+                    SqlDataReader rdr = null;
+                    rdr = cmd.ExecuteReader();
+                    var personCount = 0;
+                    var addressCount = 0;
+                    var altAddressCount = 0;
+                    int personid = 0;
+                    int addid = 0;
+
+                    Person person = new Person();
+                    Address address = null;
+
+                    person.PrimaryAddress = new Address { };
+                    person.AlternativeAddresses = new List<AlternativeAddress>() { };
+                    while (rdr.Read())
                     {
-                        personCount++;
-                        person.PersonID = pid;
-                        personid = person.PersonID;
-                        person.FirstName = (string)rdr["FirstName"];
-                        person.LastName = (string)rdr["LastName"];
-                        person.Email = (string)rdr["Email"];
-                        person.Notes = (string)rdr["Note"];
-                    }
-                    if (!rdr.IsDBNull(5))
-                    {
-                        addressCount++;
-                        var addressid = (int)rdr["addressasseID"];
-                        if (addid != addressid)
+                        var pid = (int)rdr["PersonId"];
+                        if (personid != pid) //Hent root Person
                         {
-                            address = new Address
+                            personCount++;
+                            person.PersonID = pid;
+                            personid = person.PersonID;
+                            person.FirstName = (string)rdr["FirstName"];
+                            person.LastName = (string)rdr["LastName"];
+                            person.Email = (string)rdr["Email"];
+                            person.Notes = (string)rdr["Note"];
+                        }
+                        if (!rdr.IsDBNull(5))
+                        {
+                            addressCount++;
+                            var addressid = (int)rdr["addressasseID"];
+                            if (addid != addressid)
                             {
-                                PersonsPrimary = new List<Person> { },
-                                AddressID = addressid
-                            };
-                            person.PrimaryAddress = address;
+                                address = new Address
+                                {
+                                    PersonsPrimary = new List<Person> { },
+                                    AddressID = addressid
+                                };
+                                person.PrimaryAddress = address;
+                            }
+
+                            if (address != null)
+                            {
+                                addid = address.AddressID;
+                                address.StreetName = (string)rdr["StreetName"];
+                                address.HouseNumber = (string)rdr["HouseNumber"];
+                                address.PostNr = (PostNr)rdr["PostNr"];
+                                address.PersonID = (int)rdr["Person"];
+                            }
                         }
 
-                        if (address != null)
+                        if (!rdr.IsDBNull(12))
                         {
-                            addid = address.AddressID;
-                            address.StreetName = (string)rdr["StreetName"];
-                            address.HouseNumber = (string)rdr["HouseNumber"];
-                            address.PostNr = (PostNr)rdr["PostNr"];
-                            address.PersonID = (int)rdr["Person"];
+                            altAddressCount++;
+                            AlternativeAddress aa = new AlternativeAddress();
+
+                            aa.AAID = (int)rdr["Alt Address ID"];
+                            aa.AAType = (string)rdr["Alt Address Type"];
+                            aa.Persons = (Person)rdr["Persons"];
+                            aa.Address = (Address)rdr["Address"];
+                            address.AlternativePerson.Add(aa);
                         }
-                    }
-
-                    if (!rdr.IsDBNull(12))
-                    {
-                        altAddressCount++;
-                        AlternativeAddress aa = new AlternativeAddress();
-
-                        aa.AAID = (int)rdr["Alt Address ID"];
-                        aa.AAType = (string)rdr["Alt Address Type"];
-                        aa.Persons = (Person)rdr["Persons"];
-                        aa.Address = (Address)rdr["Address"];
-                        address.AlternativePerson.Add(aa);
                     }
                 }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                ToString();
+                throw;
+            }
+
         }
 
 
@@ -462,7 +474,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                     {
                         AAType = (string)rdr["AddressType"],
                         Persons = (Person)rdr["Person"],
-                        AddressID = (int)rdr["Address Id"]
+                        AddressID = (int)rdr["AddressId"]
                     };
 
                     addressList.Add(aa);
@@ -471,9 +483,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
             }
         }
         #endregion
-
-
-
 
         // CRUD operation on an email & Notes
         #region Create, Update, Delete an Email & Note
