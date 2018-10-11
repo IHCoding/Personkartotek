@@ -9,40 +9,33 @@ namespace ApplicationLogic
         public void ProgramApp()
         {
             PersonkartotekDBUtil personUtil = new PersonkartotekDBUtil();
-            Person person = new Person() { PersonID = 1 };
+            Person newPerson = new Person() { PersonID = 1, FirstName = "Mike", MiddleName = "", LastName = "Moore", };
+            personUtil.CreatePersonDB(ref newPerson);
 
-            personUtil.GetFullContactPersonTreeDB(ref person);
+            personUtil.GetFullContactPersonTreeDB(ref newPerson);
             return;
 
-            //Person newPerson = new Person() { FirstName = "Barak", MiddleName = "Hussain", LastName = "Obama", Email = " ", Notes = "Find about him on Google!" };
 
-            //personUtil.CreatePersonDB(ref newPerson);
-
-
-
-
-            Person person1 = new Person() { FirstName = "Barak", MiddleName = "", LastName = "Obama", Email = "12342018@yahoo.com ", Notes = "He is a student at IHA" };
-            personUtil.CreatePersonDB(ref person1);
+            Person person1 = new Person() { PersonID = 2, FirstName = "Michael", MiddleName = "", LastName = "Rasmussen", TelefonNumbers = null, Notes = null, Emails = null, };
             personUtil.GetPersonByName(ref person1);
+            personUtil.CreatePersonDB(ref person1);
 
             Address primaryAddr, altA;
             primaryAddr = new Address() // primary address
             {
                 StreetName = "Finlandsgade",
                 HouseNumber = "99",
-                PersonID = person1.PersonID,
-                PostNrID = 8200,
+                Town = new City() { PostNumber = "8260" },
                 AlternativePerson = new List<AlternativeAddress>(),
                 PersonsPrimary = new List<Person>()
             };
 
-            primaryAddr.PersonsPrimary.Add(person1); // reference fra Alt address til Person
+            primaryAddr.PersonsPrimary.Add(person1); // reference from Alt address to Person
             AlternativeAddress altAdr;
 
-            person1.PrimaryAddress = primaryAddr; // reference fra person til primaert addresss
+            person1.PrimaryAddress = primaryAddr; // reference from person to primary addresss
 
-
-            altAdr = new AlternativeAddress() // address 2 reference til alternative klass el. AAType
+            altAdr = new AlternativeAddress() // address 2 reference to alternative AAType
             {
                 AAType = "Bolig",
                 AddressID = 0,
@@ -55,30 +48,45 @@ namespace ApplicationLogic
 
             altA = new Address() // alternavtive address
             {
-                StreetName = "Hinskigade",
+                StreetName = "Hilsinkigade",
                 HouseNumber = "11",
-                PersonID = person1.PersonID,
-                PostNrID = 8200,
+                Town = new City() { PostNumber = "8260" },
                 AlternativePerson = new List<AlternativeAddress>()
             };
 
 
-            // ... adding to the database ...
             altA.AlternativePerson.Add(altAdr);
 
-            person1.AlternativeAddresses.Add(altAdr); // reference fra person til ALT address
+            person1.AlternativeAddresses.Add(altAdr); // reference from person to ALT address
 
             person1.PrimaryAddress = primaryAddr;
 
-
-
-            personUtil.CreatePersonDB(ref person1);  // identical to line 25 ???
-
-            person1.AlternativeAddresses = personUtil.GetAlternativeAddressesDB(ref person1);
-
-
-            // A1 is set to Person & saved to database via pk.
-            // AAT has PID og AID
+            person1.AlternativeAddresses = personUtil.GetPersonAlternativeAddresses(ref person1);
         }
     }
 }
+
+
+/*
+ Select med ID
+ Select all
+ Delete 
+ update 
+ Insert
+ 
+
+    unitofwork
+    {
+        begin
+        gem address
+        Primaer nogle fra Address til Person's FK
+        Gem Person
+        Primaer nogle fra PErson til Email's FK
+        gem Email
+        Praer nogle fra Person til Telefo FK
+        gem Telefon
+        End
+    
+    }
+
+ */

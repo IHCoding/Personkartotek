@@ -5,7 +5,7 @@
     <AssociationLine Name="PersonsPrimary" Type="RDB.DomainModels.Models.Person" FixedToPoint="true">
       <Path>
         <Point X="1.938" Y="4.75" />
-        <Point X="1.938" Y="3.017" />
+        <Point X="1.938" Y="3.209" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="-0.662" Y="0.207" />
@@ -14,105 +14,68 @@
     <AssociationLine Name="AlternativePerson" Type="RDB.DomainModels.Models.AlternativeAddress" FixedFromPoint="true" FixedToPoint="true">
       <Path>
         <Point X="2.25" Y="4.75" />
-        <Point X="2.25" Y="4" />
-        <Point X="4" Y="4" />
+        <Point X="2.25" Y="4.25" />
+        <Point X="4.75" Y="4.25" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>QAAAACAAAAEACACAIAAAAAAEAEAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>QAAAACABAgAAAACAIAAAAAAEAEAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Models\Address.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Town" />
+    </ShowAsAssociation>
     <ShowAsCollectionAssociation>
       <Property Name="PersonsPrimary" />
       <Property Name="AlternativePerson" />
     </ShowAsCollectionAssociation>
   </Class>
   <Class Name="RDB.DomainModels.Models.AlternativeAddress">
-    <Position X="4" Y="2.25" Width="1.5" />
+    <Position X="4.75" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QgAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAEQAAA=</HashCode>
       <FileName>Models\AlternativeAddress.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="RDB.DomainModels.Models.City">
-    <Position X="7.25" Y="4.75" Width="1.5" />
-    <AssociationLine Name="country" Type="RDB.DomainModels.Models.Country" FixedFromPoint="true">
-      <Path>
-        <Point X="8.75" Y="5.125" />
-        <Point X="10" Y="5.125" />
-      </Path>
-    </AssociationLine>
-    <TypeIdentifier>
-      <HashCode>AAAAAAABIAAAAAAAAAAAAAAAAAAQAAACAAAAABAAAAA=</HashCode>
-      <FileName>Models\City.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="country" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="RDB.DomainModels.Models.Country">
-    <Position X="10" Y="4.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>ICAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Models\Country.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="RDB.DomainModels.Models.Person">
     <Position X="0.75" Y="0.5" Width="1.5" />
-    <AssociationLine Name="AlternativeAddresses" Type="RDB.DomainModels.Models.AlternativeAddress" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="2.25" Y="1.125" />
-        <Point X="4.688" Y="1.125" />
-        <Point X="4.688" Y="2.25" />
-      </Path>
-      <MemberNameLabel ManuallyPlaced="true">
-        <Position X="-0" Y="0.312" />
-      </MemberNameLabel>
-    </AssociationLine>
     <AssociationLine Name="PrimaryAddress" Type="RDB.DomainModels.Models.Address" FixedFromPoint="true">
       <Path>
-        <Point X="1.062" Y="3.017" />
+        <Point X="1.062" Y="3.209" />
         <Point X="1.062" Y="4.75" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="-0.516" Y="0.159" />
       </MemberNameLabel>
     </AssociationLine>
+    <AssociationLine Name="AlternativeAddresses" Type="RDB.DomainModels.Models.AlternativeAddress" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.25" Y="1.173" />
+        <Point X="5.438" Y="1.173" />
+        <Point X="5.438" Y="2.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.698" Y="0.322" />
+      </MemberNameLabel>
+    </AssociationLine>
     <AssociationLine Name="TelefonNumbers" Type="RDB.DomainModels.Models.Telefon" FixedFromPoint="true">
       <Path>
-        <Point X="2.25" Y="0.812" />
-        <Point X="6.25" Y="0.812" />
+        <Point X="2.25" Y="0.836" />
+        <Point X="6.25" Y="0.836" />
       </Path>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>QAAgAEAAADAAAAAAAAAQAAAAAAAAAAABAAAAQAAAAAg=</HashCode>
+      <HashCode>QAAgAEAAADAAAAAAgAAQAAAAAAACAAABAAAAQAAAAAg=</HashCode>
       <FileName>Models\Person.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="PrimaryAddress" />
+      <Property Name="Notes" />
     </ShowAsAssociation>
     <ShowAsCollectionAssociation>
       <Property Name="AlternativeAddresses" />
       <Property Name="TelefonNumbers" />
     </ShowAsCollectionAssociation>
-  </Class>
-  <Class Name="RDB.DomainModels.Models.PostNr">
-    <Position X="4" Y="4.75" Width="1.5" />
-    <AssociationLine Name="_City" Type="RDB.DomainModels.Models.City" FixedFromPoint="true">
-      <Path>
-        <Point X="5.5" Y="5.124" />
-        <Point X="7.25" Y="5.124" />
-      </Path>
-    </AssociationLine>
-    <TypeIdentifier>
-      <HashCode>QAAAAAABAAEAAgAAAAAAAAAAAAAQAAACAEAAABAAAAA=</HashCode>
-      <FileName>Models\PostNr.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="_City" />
-      <Property Name="_Country" />
-      <Property Name="Address" />
-    </ShowAsAssociation>
   </Class>
   <Class Name="RDB.DomainModels.Models.Provider">
     <Position X="10" Y="0.5" Width="1.5" />
@@ -135,6 +98,27 @@
     <TypeIdentifier>
       <HashCode>QAAAAAAAAAAEAAAAAEAAAAAEAAAAAAAgAAAACAAAAAA=</HashCode>
       <FileName>Models\Telefon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RDB.DomainModels.Models.City">
+    <Position X="4.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAIAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>Models\City.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RDB.DomainModels.Models.Notes">
+    <Position X="3" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAEAgAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Notes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="RDB.DomainModels.Models.Email">
+    <Position X="9.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>Models\Email.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

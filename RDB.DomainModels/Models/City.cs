@@ -2,7 +2,7 @@
 
 namespace RDB.DomainModels.Models
 {
-    [Table("City")]
+    [Table("PostNr")]
     public class City
     {
         public int CityID { get; set; }
@@ -10,8 +10,8 @@ namespace RDB.DomainModels.Models
         public string CityName { get; set; }
 
         public string PostNumber { get; set; }
-        public int CountryID { get; set; }
 
-        public virtual Country country { get; set; }
+        public string Country { get; set; }
+
     }
 }

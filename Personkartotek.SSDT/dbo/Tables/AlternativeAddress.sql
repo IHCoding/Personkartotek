@@ -1,9 +1,22 @@
-﻿CREATE TABLE [dbo].[AlternativeAddress] (
-    [PersonID]  BIGINT   NOT NULL,
-    [AddressID] BIGINT   NOT NULL,
-    [AAType]    CHAR (1) NOT NULL,
-    [AAID]      INT      NOT NULL,
-    CONSTRAINT [pk_AlternativeAddress] PRIMARY KEY CLUSTERED ([PersonID] ASC, [AddressID] ASC),
-    CONSTRAINT [fk_AlternativeAddress] FOREIGN KEY ([PersonID]) REFERENCES [dbo].[Person] ([PersonID]) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
+﻿--
+-- Create Table    : 'AlternativeAddress'   
+-- PersonID        :  (references Person.PersonID)
+-- AddressID       :  (references Address.AddressID)
+-- AAType          :  
+-- AAID            :  
+-- PersonID1       :  
+-- Address         :  
+--
+CREATE TABLE AlternativeAddress (
+    PersonID       BIGINT NOT NULL,
+    AddressID      BIGINT NOT NULL,
+    AAType         NVARCHAR(50) NOT NULL,
+CONSTRAINT pk_AlternativeAddress PRIMARY KEY CLUSTERED (PersonID,AddressID),
+CONSTRAINT fk_AlternativeAddress FOREIGN KEY (PersonID)
+    REFERENCES Person (PersonID)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+CONSTRAINT fk_AlternativeAddress2 FOREIGN KEY (AddressID)
+    REFERENCES Address (AddressID)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)

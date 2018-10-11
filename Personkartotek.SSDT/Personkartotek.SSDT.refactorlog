@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
-  <Operation Name="Rename Refactor" Key="92ef8e3e-aba0-4311-ab74-df23bc2835bb" ChangeDateTime="10/06/2018 21:18:24">
-    <Property Name="ElementName" Value="[dbo].[PostNr].[CountryID1]" />
+  <Operation Name="Rename Refactor" Key="a6dacf3a-3d99-4257-9cc8-1c72a655159b" ChangeDateTime="10/09/2018 15:06:08">
+    <Property Name="ElementName" Value="[dbo].[Telefon].[TelefonNumber]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[PostNr]" />
+    <Property Name="ParentElementName" Value="[dbo].[Telefon]" />
     <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="CountryID" />
+    <Property Name="NewName" Value="Number" />
   </Operation>
 </Operations>

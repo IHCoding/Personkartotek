@@ -6,11 +6,12 @@ namespace RDB.DomainModels.Models
     [Table("AlternativeAddress")]
     public class AlternativeAddress
     {
-        public int AAID { get; set; }
+        public long AAID { get; set; }
 
         [Key]
         public string AAType { get; set; }
 
+        // AATbl has PID og AID
         public int PersonID { get; set; }
         public int AddressID { get; set; }
 

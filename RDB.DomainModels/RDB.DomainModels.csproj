@@ -47,38 +47,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\201810061849417_InitialCreate.cs" />
-    <Compile Include="Migrations\201810061849417_InitialCreate.Designer.cs">
-      <DependentUpon>201810061849417_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201810061912466_InitialMigration.cs" />
-    <Compile Include="Migrations\201810061912466_InitialMigration.Designer.cs">
-      <DependentUpon>201810061912466_InitialMigration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\AlternativeAddress.cs" />
-    <Compile Include="Models\City.cs" />
-    <Compile Include="Models\Country.cs" />
+    <Compile Include="Models\Email.cs" />
+    <Compile Include="Models\Notes.cs" />
     <Compile Include="Models\Person.cs" />
-    <Compile Include="Models\PostNr.cs" />
+    <Compile Include="Models\City.cs" />
     <Compile Include="Models\Provider.cs" />
     <Compile Include="Models\Telefon.cs" />
-    <Compile Include="PersonkartotekContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="ClassDiagram\ClassDiagram.cd" />
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\201810061849417_InitialCreate.resx">
-      <DependentUpon>201810061849417_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201810061912466_InitialMigration.resx">
-      <DependentUpon>201810061912466_InitialMigration.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

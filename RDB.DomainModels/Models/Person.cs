@@ -11,9 +11,11 @@ namespace RDB.DomainModels.Models
             this.PrimaryAddress = new Address();
             this.AlternativeAddresses = new List<AlternativeAddress>();
             this.TelefonNumbers = new List<Telefon>();
+            this.Notes = new Notes();
+            this.Emails = new Email();
         }
 
-        public int PersonID { get; set; }
+        public long PersonID { get; set; }
 
         public string FirstName { get; set; }
 
@@ -21,9 +23,12 @@ namespace RDB.DomainModels.Models
 
         public string LastName { get; set; }
 
-        public string Email { get; set; }
+        public long AddressID { get; set; }
 
-        public string Notes { get; set; }
+
+
+        public virtual Notes Notes { get; set; }
+        public virtual Email Emails { get; set; }
 
         public virtual Address PrimaryAddress { get; set; }
 

@@ -1,5 +1,4 @@
 ﻿using RDB.DomainModels.Models;
-using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
@@ -15,81 +14,198 @@ namespace Infrastructure.PersonkartotekDB.ADONET
             FirstName = " ",
             MiddleName = "",
             LastName = "",
-            Email = null,
-            Notes = "",
+            Emails = new Email(),
+            Notes = new Notes(),
             PrimaryAddress = new Address(),
             AlternativeAddresses = new List<AlternativeAddress>(),
             TelefonNumbers = new List<Telefon>()
         };
 
-
         private SqlConnection OpenConnection
         {
             get
             {
-                var con = new SqlConnection(@"Data Source=(localdb)\ProjectsV13;Initial Catalog=Personkartotek.SSDT;Integrated Security=True;Pooling=False;Connect Timeout=30");
+                var con = new SqlConnection(
+                    @"Data Source=(localdb)\ProjectsV13;Initial Catalog=Personkartotek.SSDT;Integrated Security=True;
+                        Pooling=False;Connect Timeout=30");
                 con.Open();
                 return con;
             }
         }
 
 
+
+        // CRUD operation on an address
+
+        #region Create,Update,Delete an Address
+
+        #region Create Address
+
+        public void CreateAddressDB(ref Address adr)
+        {
+            string CreateAltAddress =
+                @"INSERT INTO [Address] (StreetName, HouseNumber, CityID, PersonID, AlternativeAddressID)
+                                                    OUTPUT INSERTED.AddressID  
+                                                    VALUES (@strName, @housnr, )";
+
+            using (SqlCommand cmd = new SqlCommand(CreateAltAddress, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@StreetName", adr.StreetName);
+                cmd.Parameters.AddWithValue("@HouseNumber", adr.HouseNumber);
+                cmd.Parameters.AddWithValue("@CityID", adr.CityID);
+                cmd.Parameters.AddWithValue("@AlternativeAddressID", adr.AlternativePerson);
+                adr.AddressID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+            }
+        }
+
+
+
+        #endregion
+
+        #region Update Address
+
+        public void UpdateAddressDB(ref Address address)
+        {
+            string UpdateAddress =
+                @"UPDATE address
+                        SET StreetName = @strName, HouseNumber = @HNumber, Town = @PostId, AlternativeAddressID = @AAddrId
+                        WHERE AddressID = @AddressId";
+
+            using (SqlCommand cmd = new SqlCommand(UpdateAddress, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@StreetName", address.StreetName);
+                cmd.Parameters.AddWithValue("@HNumber", address.HouseNumber);
+                cmd.Parameters.AddWithValue("@PostId", address.Town);
+                cmd.Parameters.AddWithValue("@AAddrId", address.AlternativeAddressID);
+
+                var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+            }
+        }
+
+        #endregion
+
+        #region Delete Address
+
+        public void DeleteAddressDB(ref Address adr)
+        {
+            string DeleteAddress =
+                @"DELETE FROM Address WHERE (Address = @addr)";
+
+            using (SqlCommand cmd = new SqlCommand(DeleteAddress, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@addr", adr.AddressID);
+
+                var adId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                adr = null;
+            }
+        }
+
+        #endregion
+
+        #region GetPersonAddress
+
+        public Address GetPersonAddress(ref Person person)
+        {
+            var sqlcmd = @"SELECT  TOP * 
+                           FROM [Address] 
+                           WHERE ([Person] = @PID)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PID", person.PersonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                var primaryPerAddr = new Address();
+                while (rdr.Read())
+                {
+                    var addr = new Address
+                    {
+                        AddressID = (int)rdr["AddrId"],
+                        StreetName = (string)rdr["StreenName"],
+                        HouseNumber = (string)rdr["HouseNumber"],
+                        Town = (City)rdr["Town"]
+                    };
+
+                    primaryPerAddr = addr;
+                }
+
+                return primaryPerAddr;
+            }
+        }
+
+
+        #endregion
+
+        #endregion
+
+
+
         // CRUD operation on a contact person
+
         #region Create, Update, Delete a Person
 
         #region Create a contact Person
+
         public void CreatePersonDB(ref Person person)
         {
-            // prepare command string using paramters in string and returning the given identity 
-
-            string CreatePerson = @"INSERT INTO [Person] (FirstName, LastName, Email, Notes, TelfonNumbers, PrimaryAddress, AlternativeAddresses)
+            string CreatePerson =
+                @"INSERT INTO [Person] (FirstName, MiddleName, LastName )   /* // ,AddressID*/
                                                     OUTPUT INSERTED.PersonID  
-                                                    VALUES (@FirstName, @LastName,@Email, @Note, @TlfNumber, @PA, @AD )";
+                                                    VALUES (@FName, @MName, @LName)"; /*, @AID*/
 
             using (SqlCommand cmd = new SqlCommand(CreatePerson, OpenConnection))
             {
                 // Get your parameters ready                    
-                cmd.Parameters.AddWithValue("@FirstName", person.FirstName);
-                cmd.Parameters.AddWithValue("@LastName", person.LastName);
-                cmd.Parameters.AddWithValue("@Email", person.Email);
-                cmd.Parameters.AddWithValue("@Note", person.Notes);
-                cmd.Parameters.AddWithValue("@TlfNumber", person.Notes);
-                cmd.Parameters.AddWithValue("@PA", person.PrimaryAddress);
-                cmd.Parameters.AddWithValue("@AA", person.AlternativeAddresses);
-                person.PersonID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+                cmd.Parameters.AddWithValue("@FName", person.FirstName);
+                cmd.Parameters.AddWithValue("@MName", person.MiddleName);
+                cmd.Parameters.AddWithValue("@LName", person.LastName);
+                cmd.Parameters.AddWithValue("@AID", person.PrimaryAddress.AddressID);
+
+                // try
+                // {
+                // person.PersonID = (int)cmd.ExecuteScalar();
+                // }
+                //catch
+                //{
+                //    Console.WriteLine("Adresse ID doesn't exist, do you want to add it? [y/n]");
+                //    ConsoleKeyInfo input = Console.ReadKey();
+
+                //    if (input.Key == ConsoleKey.Y)
+                //    {
+                //        //create an insert querry to the dbo.Adresse the same way you did with the dbo.person.
+                //        CreateAddressDB();
+                //    }
+                //}
             }
         }
+
         #endregion
 
-
         #region UpdatePerson
+
         public void UpdatePersonDB(ref Person person)
         {
             string UpdatePerson =
                 @"UPDATE person
-                        SET FirstName = @FirstName, LastName = @LastName, Email = @Email, TelefonNumbers = @TlfNumber, 
-                                Notes = @Note, PrimaryAddress = @PA, AlternativeAddresses=AA
+                        SET FirstName = @FName, MName = @MiddleName, LName = @LastName, AddressID = @AddressId
                         WHERE PersonID = @PersonID";
 
             using (SqlCommand cmd = new SqlCommand(UpdatePerson, OpenConnection))
             {
                 // Get your parameters ready                    
-                cmd.Parameters.AddWithValue("@FirstName", person.FirstName);
-                cmd.Parameters.AddWithValue("@LastName", person.LastName);
-                cmd.Parameters.AddWithValue("@Email", person.Email);
-                cmd.Parameters.AddWithValue("@Note", person.Notes);
-                cmd.Parameters.AddWithValue("@TlfNumber", person.TelefonNumbers);
-                cmd.Parameters.AddWithValue("@PA", person.PrimaryAddress);
-                cmd.Parameters.AddWithValue("@AA", person.AlternativeAddresses);
-                cmd.Parameters.AddWithValue("@PersonID", person.PersonID);
+                cmd.Parameters.AddWithValue("@FName", person.FirstName);
+                cmd.Parameters.AddWithValue("@MName", person.MiddleName);
+                cmd.Parameters.AddWithValue("@LName", person.LastName);
+                cmd.Parameters.AddWithValue("@AddressId", person.AddressID);
 
                 var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
         }
+
         #endregion
 
-
         #region DeletePerson
+
         public void DeletePersonDB(ref Person person)
         {
             string DeletePerson =
@@ -104,120 +220,90 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 person = null;
             }
         }
-        #endregion
 
         #endregion
 
+        #region GetPersonByName
 
-        // CRUD operation on an address
-        #region Create,Update,Delete an Address
-
-        #region Create Address
-
-        public void CreateAddressDB(ref Address adr)
+        public void GetPersonByName(ref Person person)
         {
-            string CreateAltAddress = @"INSERT INTO [Address] (StreetName, HouseNumber, PostNr, PersonsPrimary, AlternativePerson)
-                                                    OUTPUT INSERTED.AddressID  
-                                                    VALUES (@strName, @housnr, )";
-
-            using (SqlCommand cmd = new SqlCommand(CreateAltAddress, OpenConnection))
+            var sqlcmd = @"SELECT  TOP * FROM Person WHERE (FirstName = @fname) AND (LastName=@lname)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@StreetName", adr.StreetName);
-                cmd.Parameters.AddWithValue("@HouseNumber", adr.HouseNumber);
-                cmd.Parameters.AddWithValue("@PostNr", adr.PostNr);
-                cmd.Parameters.AddWithValue("@PersonPrimary", adr.PersonsPrimary);
-                cmd.Parameters.AddWithValue("@AlternativePerson", adr.AlternativePerson);
-                adr.AddressID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+                cmd.Parameters.AddWithValue("@fname", person.FirstName);
+                cmd.Parameters.AddWithValue("@lname", person.LastName);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                if (rdr.Read())
+                {
+                    CurrentPerson.PersonID = (int)rdr["PersonId"];
+                    CurrentPerson.FirstName = (string)rdr["fname"];
+                    CurrentPerson.LastName = (string)rdr["lname"];
+                    //CurrentPerson.Emails = (Email)rdr["Emails"];
+                    //CurrentPerson.Notes = (Notes)rdr["Notes"];
+                    //CurrentPerson.PrimaryAddress = (Address)rdr["Address"];
+                    //CurrentPerson.TelefonNumbers = (List<Telefon>)rdr["Numbers"];
+                    //CurrentPerson.AlternativeAddresses = (List<AlternativeAddress>)rdr["AltAddress(es)"];
+                    person = CurrentPerson;
+                }
             }
         }
 
 
-
-        #endregion
-
-        #region Update Contact Address
-        public void UpdateAddressDB(ref Address address)
-        {
-            string UpdateAddress =
-                @"UPDATE address
-                        SET StreetName = @strName, HouseNumber = @HNumber, PostNrID = @PostId, AlternativeAddressID = @AAddrId, PersonID = @PersonId
-                        WHERE AddressID = @AddressId";
-
-            using (SqlCommand cmd = new SqlCommand(UpdateAddress, OpenConnection))
-            {
-                cmd.Parameters.AddWithValue("@StreetName", address.StreetName);
-                cmd.Parameters.AddWithValue("@HNumber", address.HouseNumber);
-                cmd.Parameters.AddWithValue("@PostId", address.PostNrID);
-                cmd.Parameters.AddWithValue("@AAddrId", address.AlternativeAddressID);
-                cmd.Parameters.AddWithValue("@PersonId", address.PersonID);
-
-                var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
-            }
-        }
-        #endregion
-
-        #region Delete Address
-        public void DeleteAddressDB(ref Address adr)
-        {
-            string DeleteAddress =
-                @"DELETE FROM Address WHERE (Address = @addr)";
-
-            using (SqlCommand cmd = new SqlCommand(DeleteAddress, OpenConnection))
-            {
-                cmd.Parameters.AddWithValue("@addr", adr.AddressID);
-
-                var adId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
-                adr = null;
-            }
-        }
         #endregion
 
         #endregion
+
 
 
         // CRUD operation on an Alternative Address
+
         #region Create, Update, Delete an Alternative Address
 
         #region Create Alternative Address
+
         public void CreateAddressDB(ref AlternativeAddress AA)
         {
             string CreateAltAddress = @"INSERT INTO [AlternativeAddress] (AAType, PersonID, AddressID)
                                                     OUTPUT INSERTED.AAID  
-                                                    VALUES (@AltAddressType, @PersonId, @AddressId)";
+                                                    VALUES (@AltAType, @PersonId, @AddressId)";
 
             using (SqlCommand cmd = new SqlCommand(CreateAltAddress, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@AltAddressType", AA.AAType);
+                cmd.Parameters.AddWithValue("@AltAType", AA.AAType);
                 cmd.Parameters.AddWithValue("@PersonId", AA.PersonID);
                 cmd.Parameters.AddWithValue("@AddressId", AA.AddressID);
                 AA.AAID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
             }
         }
+
         #endregion
 
-
         #region Update Alternative Address
+
         public void UpdateAlternativeAddressDB(ref AlternativeAddress AA)
         {
             string UpdatePerson =
                 @"UPDATE AA
-                        SET AAType = @AltAddressType, PersonID = @PersonId, AddressID = @AddressId
+                        SET AAType = @AltAType, PersonID = @PersonId, AddressID = @AddressId
                         WHERE AAID = @AltAddressId";
 
             using (SqlCommand cmd = new SqlCommand(UpdatePerson, OpenConnection))
             {
                 // Get your parameters ready                    
-                cmd.Parameters.AddWithValue("@AltAddressType", AA.AAType);
+                cmd.Parameters.AddWithValue("@AltAType", AA.AAType);
                 cmd.Parameters.AddWithValue("@PersonId", AA.PersonID);
                 cmd.Parameters.AddWithValue("@AddressId", AA.AddressID);
 
                 var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
         }
+
         #endregion
 
-
         #region Delete Alternative Address
+
         public void DeleteAlternativeAddressDB(ref AlternativeAddress AA)
         {
             string DeleteALtAddress =
@@ -231,14 +317,52 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 AA = null;
             }
         }
+
+        #endregion
+
+        #region GetPersonAlternativeAddresses
+
+        public List<AlternativeAddress> GetPersonAlternativeAddresses(ref Person person)
+        {
+            var sqlcmd = @"SELECT  TOP * 
+                           FROM [AlternativeAddress] 
+                           WHERE ([Person] = @PID)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PID", person.PersonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                List<AlternativeAddress> listPerAltAddr = new List<AlternativeAddress>();
+                while (rdr.Read())
+                {
+                    var altAddr = new AlternativeAddress
+                    {
+                        AAID = (int)rdr["AddrId"],
+                        AAType = (string)rdr["AltAType"], // type = work,summerhouse,etc.
+                        //Address = (Address)rdr["Address"],
+                        //Persons = (Person)rdr["PersonsResiding"]
+                    };
+
+                    listPerAltAddr.Add(altAddr);
+                }
+
+                return listPerAltAddr;
+            }
+        }
+
+
         #endregion
 
         #endregion
 
 
         // CRUD operation on a Telefon
+
         #region Create, Update, Delete a Telefon
+
         #region Create a Telefon
+
         public void CreateTelefonDB(ref Telefon tlf)
         {
             string CreateTelefon = @"INSERT INTO [Telefon] (Number, PersonID, ProviderID, TelefonType)
@@ -254,14 +378,15 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 tlf.PersonID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
             }
         }
+
         #endregion
 
-
         #region Update a Telefon
+
         public void UpdateTelefonDB(ref Telefon tlf)
         {
             string UpdateTelefon =
-                @"UPDATE telfeon
+                @"UPDATE Telfeon
                         SET Number = @TlfNr, TelefonType = @TlfType, ProviderID = @ProviderId, PersonID = @PersonId
                         WHERE TelefonID = @TelefonId";
 
@@ -275,10 +400,11 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 var TlfId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
         }
+
         #endregion
 
-
         #region Delete a Telefon
+
         public void DeleteTelefonDB(ref Telefon tlf)
         {
             string DeleteTelefon =
@@ -293,47 +419,344 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 tlf = null;
             }
         }
+
+        #endregion
+
+        #region GetPersonTelefon
+
+        public List<Telefon> GetPersonTelefon(ref Person person)
+        {
+            var sqlcmd = @"SELECT  TOP * 
+                           FROM [Telefon] 
+                           WHERE ([Person] = @PID)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PID", person.PersonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                var listTlf = new List<Telefon>();
+                while (rdr.Read())
+                {
+                    var tlf = new Telefon
+                    {
+                        TelefonID = (int)rdr["TlfID"],
+                        Number = (string)rdr["TlfNumber"],
+                        TelefonType = (string)rdr["TlfType"],
+                        TelefonProvider = (Provider)rdr["TlfProvider"]
+                    };
+
+                    listTlf.Add(tlf);
+                }
+
+                return listTlf;
+            }
+        }
+
+
+        #endregion
+
+        #endregion
+
+        // CRUD operation on a Provider
+
+        #region Create, Update, Delete Provider
+
+        #region Create a Provider
+
+        public void CreateProviderDB(ref Provider provider)
+        {
+            string CreateProvider = @"INSERT INTO [Provider] ( ProviderName)
+                                                    OUTPUT INSERTED.ProviderID  
+                                                    VALUES (@ProviderN)";
+
+            using (SqlCommand cmd = new SqlCommand(CreateProvider, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@ProviderN", provider.ProviderName);
+                provider.ProviderID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+            }
+        }
+
+        #endregion
+
+        #region Update a Provider
+
+        public void UpdateProviderDB(ref Provider provider)
+        {
+            string UpdateProvider =
+                @"UPDATE Provider
+                        SET ProviderName = @ProviderN 
+                        WHERE ProviderID = @ProviderID";
+
+            using (SqlCommand cmd = new SqlCommand(UpdateProvider, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@ProviderN", provider.ProviderName);
+
+                var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+            }
+        }
+
+        #endregion
+
+        #region Delete a Provider
+
+        public void DeleteProviderDB(ref Provider provider)
+        {
+            string DeleteProvider = @"DELETE FROM Provider WHERE (ProviderID = @ProviderId)";
+
+            using (SqlCommand cmd = new SqlCommand(DeleteProvider, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@ProviderId", provider.ProviderID);
+
+                var pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                provider = null;
+            }
+        }
+
+        #endregion
+
+        #region GetPersonTelefon
+
+        public Provider GetTelefonProvider(ref Telefon tlfProvider)
+        {
+            var sqlcmd = @"SELECT  TOP * 
+                           FROM [Provider] 
+                           WHERE ([Telefon] = @TlfId)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@tlfId", tlfProvider.TelefonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                var teleProvider = new Provider();
+                while (rdr.Read())
+                {
+                    var providerInfo = new Provider
+                    {
+                        ProviderID = (int)rdr["ProviderId"],
+                        ProviderName = (string)rdr["ProviderName"]
+                    };
+
+                    teleProvider = providerInfo;
+                }
+
+                return teleProvider;
+            }
+        }
+
+
+        #endregion
+
+        #endregion
+
+
+        // CRUD operation on an Email 
+
+        #region Create, Update, Delete an Email 
+
+        #region Create Email
+
+        public void CreateEmailDB(ref Email email)
+        {
+            string CreateEmail = @"INSERT INTO [Email] (EmailAddress, PersonID)
+                                                    OUTPUT INSERTED.EmailID  
+                                                    VALUES ( @EimailAddress, @PersonID)";
+
+            using (SqlCommand cmd = new SqlCommand(CreateEmail, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@EmailAddress", email.EmailAddress);
+                cmd.Parameters.AddWithValue("@PersonID", email.PersonID);
+                email.EmailID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+            }
+        }
+
+
+        #endregion
+
+        #region Update an Email
+
+        public void UpdateEmailDB(ref Email email)
+        {
+            string UpdateTelefon =
+                @"UPDATE telfeon
+                        SET EmailAddress  = @email, PersonID = @PersonId
+                        WHERE EmailID = @EmailID";
+
+            using (SqlCommand cmd = new SqlCommand(UpdateTelefon, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@email", email.EmailAddress);
+                cmd.Parameters.AddWithValue("@PersonId", email.PersonID);
+
+                var emlId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+            }
+        }
+
+        #endregion
+
+        #region Delete an Email
+
+        public void DeleteEmailDB(ref Email email)
+        {
+            string DeleteEmail =
+                @"DELETE FROM Email WHERE (EmailID = @EmailID)";
+
+            using (SqlCommand cmd = new SqlCommand(DeleteEmail, OpenConnection))
+            {
+                // Get your parameters ready                    
+                cmd.Parameters.AddWithValue("@EmailID", email.EmailID);
+
+                var pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                email = null;
+            }
+        }
+
+        #endregion
+
+        #region GetPersonEmail
+
+        public Email GetPersonEmail(ref Person person)
+        {
+            var sqlcmd = @"SELECT  TOP * 
+                           FROM [Email] 
+                           WHERE ([Person] = @PID)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PID", person.PersonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                var email = new Email();
+                while (rdr.Read())
+                {
+                    var emailInfo = new Email
+                    {
+                        EmailID = (int)rdr["EmailId"],
+                        EmailAddress = (string)rdr["EmailAddress"]
+                    };
+
+                    email = emailInfo;
+                }
+
+                return email;
+            }
+        }
+
+
+        #endregion
+
+        #endregion
+
+
+        // CRUD operation on Notes 
+
+        #region Create, Update, Delete Notes 
+
+        #region Create Notes
+
+        public void CreateNotesDB(ref Notes notes)
+        {
+            string CreateNotes = @"INSERT INTO [Notes] (NotesText, PersonID)
+                                                    OUTPUT INSERTED.NotesID  
+                                                    VALUES (@NotesText, @PersonID)";
+
+            using (SqlCommand cmd = new SqlCommand(CreateNotes, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@NotesText", notes.NotesText);
+                cmd.Parameters.AddWithValue("@PersonID", notes.PersonID);
+                notes.PersonID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+            }
+        }
+
+
+        #endregion
+
+        #region Update Notes
+
+        public void UpdateNotesDB(ref Notes notes)
+        {
+            string UpdateNotes =
+                @"UPDATE Notes
+                        SET NotesText = @NotesText PersonID = @PersonId
+                        WHERE NotesID = @NotesID";
+
+            using (SqlCommand cmd = new SqlCommand(UpdateNotes, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@NotesText", notes.NotesText);
+                cmd.Parameters.AddWithValue("@PersonId", notes.PersonID);
+
+                var noteId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+            }
+        }
+
+        #endregion
+
+        #region Delete an Email
+
+        public void DeleteNotesDB(ref Notes notes)
+        {
+            string DeleteNotes =
+                @"DELETE FROM Notes WHERE (NotesID = @NotesID)";
+
+            using (SqlCommand cmd = new SqlCommand(DeleteNotes, OpenConnection))
+            {
+                // Get your parameters ready                    
+                cmd.Parameters.AddWithValue("@EmailID", notes.NotesID);
+
+                var pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                notes = null;
+            }
+        }
+
+        #endregion
+
+        #region GetPersonNotes
+
+        public Notes GetPersonNotes(ref Person person)
+        {
+            var sqlcmd = @"SELECT  TOP * 
+                           FROM [Notes] 
+                           WHERE ([Person] = @PID)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PID", person.PersonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                var personNotes = new Notes();
+                while (rdr.Read())
+                {
+                    var noteInfo = new Notes
+                    {
+                        NotesID = (int)rdr["NotesId"],
+                        NotesText = (string)rdr["Notes"]
+                    };
+
+                    personNotes = noteInfo;
+                }
+
+                return personNotes;
+            }
+        }
+
         #endregion
 
         #endregion
 
 
         // Overview of the Contact Person
-        #region Get person by name & Get Person List 
-        public void GetPersonByName(ref Person person)
-        {
-            var sqlcmd = @"SELECT  TOP 1 * FROM Person WHERE (FirstName = @fname) AND (LastName=@lname)";
-            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
-            {
-                cmd.Parameters.AddWithValue("@fname", person.FirstName);
-                cmd.Parameters.AddWithValue("@lname", person.LastName);
-                SqlDataReader rdr = null;
-                rdr = cmd.ExecuteReader();
 
-                if (rdr.Read())
-                {
-                    CurrentPerson.PersonID = (int)rdr["PersonId"];
-                    CurrentPerson.FirstName = (string)rdr["fname"];
-                    CurrentPerson.LastName = (string)rdr["lname"];
-                    CurrentPerson.Email = (string)rdr["Email"];
-                    CurrentPerson.Notes = (string)rdr["Note"];
-                    CurrentPerson.PrimaryAddress = (Address)rdr["Address"];
-                    CurrentPerson.TelefonNumbers = (List<Telefon>)rdr["Numbers"];
-                    CurrentPerson.AlternativeAddresses = rdr["AltAddress(es)"] as List<AlternativeAddress>;
-                    person = CurrentPerson;
-                }
-            }
-        }
+        #region Get Person List with Complete Detail
 
+        #region GetPersonList
 
-        public List<Person> GetPersonList()
+        public List<Person> GetPersonList_Completenfo()
         {
             var sqlcmd = @"SELECT * FROM Person";
             using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
             {
                 SqlDataReader rdr = null;
                 rdr = cmd.ExecuteReader();
-                List<Person> PList = new List<Person>();
+                var PList = new List<Person>();
                 Person person = null;
                 while (rdr.Read())
                 {
@@ -342,153 +765,122 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                         PersonID = (int)rdr["PersonId"],
                         FirstName = (string)rdr["fname"],
                         LastName = (string)rdr["lname"],
-                        Email = (string)rdr["Email"],
-                        Notes = (string)rdr["Note"],
-                        PrimaryAddress = (Address)rdr["Address"],
+                        Emails = (Email)rdr["Email"],
+                        Notes = (Notes)rdr["Note"],
+                        PrimaryAddress = (Address)rdr["PrimaryAddress"],
                         TelefonNumbers = (List<Telefon>)rdr["Numbers"],
-                        AlternativeAddresses = rdr["AltAddress(es)"] as List<AlternativeAddress>
+                        AlternativeAddresses = (List<AlternativeAddress>)rdr["AltAddress(es)"]
                     };
                     PList.Add(person);
                 }
+
                 return PList;
             }
         }
+
+
         #endregion
 
+        #endregion
+
+        // Maybe unusefull!!
+
         #region Full tree for person - GetFullContactPersonTreeDB
+
         public void GetFullContactPersonTreeDB(ref Person fcpt)
         {
-            string fullPersonkartotek = @"SELECT  Person.PersonId, Person.FirstName, Person.MiddleName, Person.LastName, Person.Email, Person.Notes, Person.PrimaryAddress, Person.AlternativeAddresses, Person.TelefonNumbers
-                                              Address.AddressID, Address.StreetName, Address.HouseNumber, Address.PostNr, Address.PersonPrimary, Person.AlternativePerson
-                                              PostNr.PostNrID, PostNr.PostNumber, PostNr._Country, PostNr._City
-                                              City.CityID, City.CityName,
-                                              Country.CountryID, Country.CountryCode, Country.CountryName,
-                                              Telefon.TelefonID, Telefon.Number, Telefon.TelefonType, Telefon.TelefonProvider, 
-                                              Provider.ProviderID, Provider.ProviderName
-                                              
-                FROM      Person INNER JOIN
-                Address ON Person.PersonId = Address.Person INNER JOIN
-                Telefon ON Person.PersonID = Telefon.Person
-                AlternativeAddress ON Person.PersonID = AlternativeAddress.Person
-                Address ON Person.PersonID = Address.Person
-                WHERE   (Person.PersonID = @PersonId)";
+            string fullPersonkartotek =
+                @"SELECT    Address.AddressID, Address.StreetName, Address.HouseNumber, 
+                                City.CityID, City.CityName, City.PostNumber, City.Country,
+                                Person.PersonID, Person.FirstName, Person.MiddleName, Person.LastName,
+                                Telefon.TelefonID, Telefon.Number, Telefon.TelefonType, 
+                                Email.EmailID, Email.EmailAddress, 
+                                Notes.NotesID, Notes.NotesText
+                    
+                     FROM       Address INNER JOIN
+                                City ON City.CityID = Address.CityID 
+                                    INNER JOIN
+                                Person ON Address.AddressID = Person.AddressID 
+                                    INNER JOIN
+                                Telefon ON Telefon.PersonID = Person.PersonID 
+                                    INNER JOIN
+                                Email ON Email.PersonID = Person.PersonID
+                                    INNER JOIN
+                                Notes ON Notes.PersonID = Person.PersonID
+                    WHERE       Person.PersonID = @PersonID";
 
-            try
+
+            using (SqlCommand cmd = new SqlCommand(fullPersonkartotek, OpenConnection))
             {
-                using (var cmd = new SqlCommand(fullPersonkartotek, OpenConnection))
+                cmd.Parameters.AddWithValue("@PersonID", fcpt.PersonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+                int personCount = 0;
+                int addressCount = 0;
+                int altAddressCount = 0;
+                long personid = 0;
+                long addid = 0;
+
+                Person person = new Person();
+                Address address = null;
+
+                person.PrimaryAddress = new Address { };
+                person.AlternativeAddresses = new List<AlternativeAddress>();
+                while (rdr.Read())
                 {
-                    cmd.Parameters.AddWithValue("@PersonId", fcpt.PersonID);
-                    SqlDataReader rdr = null;
-                    rdr = cmd.ExecuteReader();
-                    var personCount = 0;
-                    var addressCount = 0;
-                    var altAddressCount = 0;
-                    int personid = 0;
-                    int addid = 0;
-
-                    Person person = new Person();
-                    Address address = null;
-
-                    person.PrimaryAddress = new Address { };
-                    person.AlternativeAddresses = new List<AlternativeAddress>() { };
-                    while (rdr.Read())
+                    long pid = (long)rdr["PersonId"];
+                    if (personid != pid)
                     {
-                        var pid = (int)rdr["PersonId"];
-                        if (personid != pid) //Hent root Person
+                        personCount++;
+                        person.PersonID = pid;
+                        personid = person.PersonID;
+                        person.FirstName = (string)rdr["FirstName"];
+                        person.LastName = (string)rdr["LastName"];
+                        //person.Emails = (string)rdr["EmailAddress"];
+                        //person.Notes = (string)rdr["Notes"];
+                    }
+
+                    if (!rdr.IsDBNull(5))
+                    {
+                        addressCount++;
+                        long addressid = (long)rdr["AddressID"];
+                        if (addid != addressid)
                         {
-                            personCount++;
-                            person.PersonID = pid;
-                            personid = person.PersonID;
-                            person.FirstName = (string)rdr["FirstName"];
-                            person.LastName = (string)rdr["LastName"];
-                            person.Email = (string)rdr["Email"];
-                            person.Notes = (string)rdr["Note"];
-                        }
-                        if (!rdr.IsDBNull(5))
-                        {
-                            addressCount++;
-                            var addressid = (int)rdr["addressasseID"];
-                            if (addid != addressid)
+                            address = new Address
                             {
-                                address = new Address
-                                {
-                                    PersonsPrimary = new List<Person> { },
-                                    AddressID = addressid
-                                };
-                                person.PrimaryAddress = address;
-                            }
-
-                            if (address != null)
-                            {
-                                addid = address.AddressID;
-                                address.StreetName = (string)rdr["StreetName"];
-                                address.HouseNumber = (string)rdr["HouseNumber"];
-                                address.PostNr = (PostNr)rdr["PostNr"];
-                                address.PersonID = (int)rdr["Person"];
-                            }
+                                PersonsPrimary = new List<Person> { },
+                                AddressID = addressid
+                            };
+                            person.PrimaryAddress = address;
                         }
 
-                        if (!rdr.IsDBNull(12))
+                        if (address != null)
                         {
-                            altAddressCount++;
-                            AlternativeAddress aa = new AlternativeAddress();
-
-                            aa.AAID = (int)rdr["Alt Address ID"];
-                            aa.AAType = (string)rdr["Alt Address Type"];
-                            aa.Persons = (Person)rdr["Persons"];
-                            aa.Address = (Address)rdr["Address"];
-                            address.AlternativePerson.Add(aa);
+                            addid = address.AddressID;
+                            address.StreetName = (string)rdr["StreetName"];
+                            address.HouseNumber = (string)rdr["HouseNumber"];
+                            address.Town = (City)rdr["Town"];
                         }
+                    }
+
+                    if (!rdr.IsDBNull(12))
+                    {
+                        altAddressCount++;
+                        AlternativeAddress aa = new AlternativeAddress()
+                        {
+                            AAID = (long)rdr["AlternativeAddressID"],
+                            AAType = (string)rdr["AltAddressType"],
+                            //Persons = (Person)rdr["Persons"],
+                            //Address = (Address)rdr["Address"]
+                        };
+
+                        address.AlternativePerson.Add(aa);
                     }
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                ToString();
-                throw;
-            }
 
         }
 
-
         #endregion
-
-        #region Get Alternative address list - GetAlternativeAddress
-        public List<AlternativeAddress> GetAlternativeAddressesDB(ref Person person)
-        {
-            string selectToolboxToolString = @"SELECT *
-                                                  FROM [AlternativeAddress] 
-                                                  WHERE ([Person] = @PersonId)";
-            using (var cmd = new SqlCommand(selectToolboxToolString, OpenConnection))
-            {
-
-                SqlDataReader rdr = null;
-                cmd.Parameters.AddWithValue("@PersonId", person.PersonID);
-                rdr = cmd.ExecuteReader();
-                List<AlternativeAddress> addressList = new List<AlternativeAddress>();
-                AlternativeAddress aa = null;
-                while (rdr.Read())
-                {
-                    aa = new AlternativeAddress
-                    {
-                        AAType = (string)rdr["AddressType"],
-                        Persons = (Person)rdr["Person"],
-                        AddressID = (int)rdr["AddressId"]
-                    };
-
-                    addressList.Add(aa);
-                }
-                return addressList;
-            }
-        }
-        #endregion
-
-        // CRUD operation on an email & Notes
-        #region Create, Update, Delete an Email & Note
-        // Email og Notes er blev oprettet, updated og slettet under Contact Person ovenfor.
-        // Da de begge to er defineret som attribute
-        #endregion
-
     }
 }
