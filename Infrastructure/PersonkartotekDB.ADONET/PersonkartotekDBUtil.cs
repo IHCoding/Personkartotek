@@ -44,7 +44,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         public void CreateAddressDB(ref Address adr)
         {
             string CreateAltAddress =
-                @"INSERT INTO [Address] (StreetName, HouseNumber, CityID, PersonID, AlternativeAddressID)
+                @"INSERT INTO [Address] (StreetName, HouseNumber, CityID)
                                                     OUTPUT INSERTED.AddressID  
                                                     VALUES (@strName, @housnr, )";
 
@@ -53,7 +53,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 cmd.Parameters.AddWithValue("@StreetName", adr.StreetName);
                 cmd.Parameters.AddWithValue("@HouseNumber", adr.HouseNumber);
                 cmd.Parameters.AddWithValue("@CityID", adr.CityID);
-                cmd.Parameters.AddWithValue("@AlternativeAddressID", adr.AlternativePerson);
                 adr.AddressID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
             }
         }
@@ -68,7 +67,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             string UpdateAddress =
                 @"UPDATE address
-                        SET StreetName = @strName, HouseNumber = @HNumber, Town = @PostId, AlternativeAddressID = @AAddrId
+                        SET StreetName = @strName, HouseNumber = @HNumber, Town = @PostId
                         WHERE AddressID = @AddressId";
 
             using (SqlCommand cmd = new SqlCommand(UpdateAddress, OpenConnection))
@@ -76,7 +75,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 cmd.Parameters.AddWithValue("@StreetName", address.StreetName);
                 cmd.Parameters.AddWithValue("@HNumber", address.HouseNumber);
                 cmd.Parameters.AddWithValue("@PostId", address.Town);
-                cmd.Parameters.AddWithValue("@AAddrId", address.AlternativeAddressID);
 
                 var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
@@ -172,7 +170,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
                 //    if (input.Key == ConsoleKey.Y)
                 //    {
-                //        //create an insert querry to the dbo.Adresse the same way you did with the dbo.person.
+                //        //create an insert querry to the dbo.Adresse the same way done with the dbo.person.
                 //        CreateAddressDB();
                 //    }
                 //}
@@ -782,8 +780,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         #endregion
 
         #endregion
-
-        // Maybe unusefull!!
 
         #region Full tree for person - GetFullContactPersonTreeDB
 

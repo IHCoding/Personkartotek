@@ -1,4 +1,5 @@
 ﻿using ApplicationLogic;
+using System;
 
 namespace ProgramApplication
 {
@@ -8,6 +9,8 @@ namespace ProgramApplication
         {
             PersonkartotekApp runApp = new PersonkartotekApp();
             runApp.ProgramApp();
+
+            Console.ReadKey();
         }
     }
 }

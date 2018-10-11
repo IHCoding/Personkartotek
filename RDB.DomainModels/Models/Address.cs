@@ -23,7 +23,7 @@ namespace RDB.DomainModels.Models
 
         public int CityID { get; set; }
 
-        public int AlternativeAddressID { get; set; }
+        // public int AlternativeAddressID { get; set; }
 
 
         public virtual City Town { get; set; }
