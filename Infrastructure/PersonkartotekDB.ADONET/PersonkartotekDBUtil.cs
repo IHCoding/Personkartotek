@@ -25,6 +25,10 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             get
             {
+                //var con = new SqlConnection(@"Data Source=st-i4dab.uni.au.dk;User ID=E18I4DABau461895;Password=E18I4DABau461895;
+                //        Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+
+
                 var con = new SqlConnection(
                     @"Data Source=(localdb)\ProjectsV13;Initial Catalog=Personkartotek.SSDT;Integrated Security=True;
                         Pooling=False;Connect Timeout=30");
@@ -147,9 +151,9 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         public void CreatePersonDB(ref Person person)
         {
             string CreatePerson =
-                @"INSERT INTO [Person] (FirstName, MiddleName, LastName )   /* // ,AddressID*/
+                @"INSERT INTO [Person] (FirstName, MiddleName, LastName, AddressID)   
                                                     OUTPUT INSERTED.PersonID  
-                                                    VALUES (@FName, @MName, @LName)"; /*, @AID*/
+                                                    VALUES (@FName, @MName, @LName, @AddressId)";
 
             using (SqlCommand cmd = new SqlCommand(CreatePerson, OpenConnection))
             {
@@ -157,23 +161,9 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 cmd.Parameters.AddWithValue("@FName", person.FirstName);
                 cmd.Parameters.AddWithValue("@MName", person.MiddleName);
                 cmd.Parameters.AddWithValue("@LName", person.LastName);
-                cmd.Parameters.AddWithValue("@AID", person.PrimaryAddress.AddressID);
+                cmd.Parameters.AddWithValue("@AddressId", person.AddressID);
 
-                // try
-                // {
-                // person.PersonID = (int)cmd.ExecuteScalar();
-                // }
-                //catch
-                //{
-                //    Console.WriteLine("Adresse ID doesn't exist, do you want to add it? [y/n]");
-                //    ConsoleKeyInfo input = Console.ReadKey();
-
-                //    if (input.Key == ConsoleKey.Y)
-                //    {
-                //        //create an insert querry to the dbo.Adresse the same way done with the dbo.person.
-                //        CreateAddressDB();
-                //    }
-                //}
+                person.PersonID = (int)cmd.ExecuteScalar();
             }
         }
 

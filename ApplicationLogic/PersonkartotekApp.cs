@@ -9,19 +9,10 @@ namespace ApplicationLogic
         public void ProgramApp()
         {
             PersonkartotekDBUtil personUtil = new PersonkartotekDBUtil();
-            Person newPerson = new Person() { PersonID = 1, FirstName = "Mike", MiddleName = "", LastName = "Moore", };
-            personUtil.CreatePersonDB(ref newPerson);
+           
 
-            personUtil.GetFullContactPersonTreeDB(ref newPerson);
-            return;
-
-
-            Person person1 = new Person() { PersonID = 2, FirstName = "Michael", MiddleName = "", LastName = "Rasmussen", TelefonNumbers = null, Notes = null, Emails = null, };
-            personUtil.GetPersonByName(ref person1);
-            personUtil.CreatePersonDB(ref person1);
-
-            Address primaryAddr, altA;
-            primaryAddr = new Address() // primary address
+            Address altA;
+            var primaryAddr = new Address() // primary address
             {
                 StreetName = "Finlandsgade",
                 HouseNumber = "99",
@@ -30,6 +21,17 @@ namespace ApplicationLogic
                 PersonsPrimary = new List<Person>()
             };
 
+            Person newPerson = new Person() { PersonID = 1, FirstName = "Mike", MiddleName = "", LastName = "Moore", AddressID = 7 };
+            personUtil.CreatePersonDB(ref newPerson);
+
+            personUtil.GetFullContactPersonTreeDB(ref newPerson);
+            return;
+
+            Person person1 = new Person() { PersonID = 2, FirstName = "Michael", MiddleName = "", LastName = "Rasmussen", AddressID = 8, TelefonNumbers = null, Notes = null, Emails = null, };
+            personUtil.GetPersonByName(ref person1);
+            personUtil.CreatePersonDB(ref person1);
+
+           
             primaryAddr.PersonsPrimary.Add(person1); // reference from Alt address to Person
             AlternativeAddress altAdr;
 
@@ -42,7 +44,6 @@ namespace ApplicationLogic
                 PersonID = 0,
                 Persons = person1,
                 Address = altA
-
             };
 
 
@@ -62,6 +63,28 @@ namespace ApplicationLogic
             person1.PrimaryAddress = primaryAddr;
 
             person1.AlternativeAddresses = personUtil.GetPersonAlternativeAddresses(ref person1);
+
+            #region Test 2
+            
+            // test 2
+
+            /*
+            Person person2 = new Person() { PersonID = 1, FirstName = "Marie", MiddleName = "", LastName = "Lorie", AddressID=8};
+            personUtil.CreatePersonDB(ref person2);
+
+            Address person2Address =
+                new Address() { AddressID = 1, StreetName = "Herningvej", HouseNumber = "1, 2th", CityID = 1 };
+            personUtil.CreateAddressDB(ref person2Address);
+
+            AlternativeAddress person2AlternativeAddress =
+                new AlternativeAddress() { AAID = 1, AAType = "Work", PersonID = 1 };
+            personUtil.UpdateAlternativeAddressDB(ref person2AlternativeAddress);
+
+            personUtil.GetFullContactPersonTreeDB(ref person2);
+            return;
+            */
+
+            #endregion
         }
     }
 }
@@ -88,5 +111,22 @@ namespace ApplicationLogic
         End
     
     }
+
+    
+                // try
+                // {
+                // person.PersonID = (int)cmd.ExecuteScalar();
+                // }
+                //catchd
+                //{
+                //    Console.WriteLine("Adresse ID doesn't exist, do you want to add it? [y/n]");
+                //    ConsoleKeyInfo input = Console.ReadKey();
+
+                //    if (input.Key == ConsoleKey.Y)
+                //    {
+                //        //create an insert querry to the dbo.Adresse the same way done with the dbo.person.
+                //        CreateAddressDB();
+                //    }
+                //}
 
  */
