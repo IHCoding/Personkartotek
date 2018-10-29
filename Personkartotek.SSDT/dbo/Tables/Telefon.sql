@@ -9,7 +9,7 @@
 --
 CREATE TABLE Telefon (
     TelefonID      BIGINT IDENTITY(1,1) NOT NULL,
-    [Number]  INT NOT NULL,
+    [Number]  BIGINT NOT NULL,
    
     TelefonType    NVARCHAR(50) NOT NULL,
     PersonID       BIGINT NOT NULL,

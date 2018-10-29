@@ -5,7 +5,7 @@ namespace RDB.DomainModels.Models
     [Table("PostNr")]
     public class City
     {
-        public int CityID { get; set; }
+        public long CityID { get; set; }
 
         public string CityName { get; set; }
 

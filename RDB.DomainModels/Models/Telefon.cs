@@ -8,7 +8,7 @@ namespace RDB.DomainModels.Models
     {
         public int TelefonID { get; set; }
 
-        public string Number { get; set; }
+        public long Number { get; set; }
 
         public int PersonID { get; set; }
 

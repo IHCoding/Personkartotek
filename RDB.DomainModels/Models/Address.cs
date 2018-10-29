@@ -21,7 +21,7 @@ namespace RDB.DomainModels.Models
         #region References to other domains
         //public long PersonID { get; set; }
 
-        public int CityID { get; set; }
+        public long CityID { get; set; }
 
         // public int AlternativeAddressID { get; set; }
 

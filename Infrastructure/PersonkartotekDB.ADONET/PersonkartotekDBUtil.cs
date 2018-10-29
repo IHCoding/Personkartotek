@@ -25,22 +25,20 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             get
             {
-                //var con = new SqlConnection(@"Data Source=st-i4dab.uni.au.dk;User ID=E18I4DABau461895;Password=E18I4DABau461895;
-                //        Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+                var con = new SqlConnection(@"Data Source=st-i4dab.uni.au.dk;User ID=E18I4DABau461895;Password=E18I4DABau461895;
+                        Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
 
 
-                var con = new SqlConnection(
-                    @"Data Source=(localdb)\ProjectsV13;Initial Catalog=Personkartotek.SSDT;Integrated Security=True;
-                        Pooling=False;Connect Timeout=30");
+                //var con = new SqlConnection(
+                //    @"Data Source=(localdb)\ProjectsV13;Initial Catalog=Personkartotek.SSDT;Integrated Security=True;
+                //        Pooling=False;Connect Timeout=30");
                 con.Open();
                 return con;
             }
         }
 
-
-
+        
         // CRUD operation on an address
-
         #region Create,Update,Delete an Address
 
         #region Create Address
@@ -50,14 +48,14 @@ namespace Infrastructure.PersonkartotekDB.ADONET
             string CreateAltAddress =
                 @"INSERT INTO [Address] (StreetName, HouseNumber, CityID)
                                                     OUTPUT INSERTED.AddressID  
-                                                    VALUES (@strName, @housnr, )";
+                                                    VALUES (@strName, @housnr, @CityId)";
 
             using (SqlCommand cmd = new SqlCommand(CreateAltAddress, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@StreetName", adr.StreetName);
-                cmd.Parameters.AddWithValue("@HouseNumber", adr.HouseNumber);
-                cmd.Parameters.AddWithValue("@CityID", adr.CityID);
-                adr.AddressID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+                cmd.Parameters.AddWithValue("@StrName", adr.StreetName);
+                cmd.Parameters.AddWithValue("@housnr", adr.HouseNumber);
+                cmd.Parameters.AddWithValue("@CityId", adr.Town.CityID);
+                adr.AddressID = (long)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
             }
         }
 
@@ -71,16 +69,17 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             string UpdateAddress =
                 @"UPDATE address
-                        SET StreetName = @strName, HouseNumber = @HNumber, Town = @PostId
+                        SET StreetName = @strName, HouseNumber = @HNumber, CityID = @PostId
                         WHERE AddressID = @AddressId";
 
             using (SqlCommand cmd = new SqlCommand(UpdateAddress, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@StreetName", address.StreetName);
+                cmd.Parameters.AddWithValue("@StrName", address.StreetName);
                 cmd.Parameters.AddWithValue("@HNumber", address.HouseNumber);
-                cmd.Parameters.AddWithValue("@PostId", address.Town);
+                cmd.Parameters.AddWithValue("@PostId", address.Town.CityID);
+                cmd.Parameters.AddWithValue("@AddressId", address.AddressID);
 
-                var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                var x = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
         }
 
@@ -91,11 +90,11 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         public void DeleteAddressDB(ref Address adr)
         {
             string DeleteAddress =
-                @"DELETE FROM Address WHERE (Address = @addr)";
+                @"DELETE FROM Address WHERE (AddressID = @addrId)";
 
             using (SqlCommand cmd = new SqlCommand(DeleteAddress, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@addr", adr.AddressID);
+                cmd.Parameters.AddWithValue("@addrId", adr.AddressID);
 
                 var adId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
                 adr = null;
@@ -140,10 +139,107 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
         #endregion
 
+        // CRUD operation on a city
+        #region Create,Update,Delete a City
+
+        #region Create City
+
+        public void CreateCityDB(ref City city)
+        {
+            string CreateCity =
+                @"INSERT INTO [City] (CityName,PostNumber, Country)
+                                                    OUTPUT INSERTED.CityID  
+                                                    VALUES (@CName, @PostNr, @country)";
+
+            using (SqlCommand cmd = new SqlCommand(CreateCity, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@CName", city.CityName);
+                cmd.Parameters.AddWithValue("@PostNr", city.PostNumber);
+                cmd.Parameters.AddWithValue("@country", city.Country);
+                city.CityID = (long)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+            }
+        }
 
 
+
+        #endregion
+
+        #region Update City
+
+        public void UpdateCityDB(ref City city)
+        {
+            string UpdateCity =
+                @"UPDATE City
+                        SET CityName = @CName, PostNumber= @PostNr, Country= @country
+                        WHERE AddressID = @CityID";
+
+            using (SqlCommand cmd = new SqlCommand(UpdateCity, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@CName", city.CityName);
+                cmd.Parameters.AddWithValue("@PostNr", city.PostNumber);
+                cmd.Parameters.AddWithValue("@country", city.Country);
+
+                var c = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+            }
+        }
+
+        #endregion
+
+        #region Delete Address
+
+        public void DeleteCityDB(ref City c)
+        {
+            string DeleteCity =
+                @"DELETE FROM City WHERE (City = @city)";
+
+            using (SqlCommand cmd = new SqlCommand(DeleteCity, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@city", c.CityID);
+
+                var adId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                c = null;
+            }
+        }
+
+        #endregion
+
+        #region GetPersonAddress
+
+        public City GetCity(ref City c)
+        {
+            var sqlcmd = @"SELECT  TOP * 
+                           FROM [City] 
+                           WHERE ([City] = @CID)";
+            using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@CID", c.CityID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+
+                var city = new City();
+                while (rdr.Read())
+                {
+                    var addr = new City
+                    {
+                        CityID = (int)rdr["CityId"],
+                        CityName = (string)rdr["CityName"],
+                        Country = (string)rdr["Country"]
+                    };
+
+                    city = addr;
+                }
+
+                return city;
+            }
+        }
+
+
+        #endregion
+
+        #endregion
+
+        
         // CRUD operation on a contact person
-
         #region Create, Update, Delete a Person
 
         #region Create a contact Person
@@ -163,7 +259,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                 cmd.Parameters.AddWithValue("@LName", person.LastName);
                 cmd.Parameters.AddWithValue("@AddressId", person.AddressID);
 
-                person.PersonID = (int)cmd.ExecuteScalar();
+                person.PersonID = (long)cmd.ExecuteScalar();
             }
         }
 
@@ -175,18 +271,20 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             string UpdatePerson =
                 @"UPDATE person
-                        SET FirstName = @FName, MName = @MiddleName, LName = @LastName, AddressID = @AddressId
+                        SET FirstName = @FName, MiddleName = @MName, LastName = @LName, AddressID = @AddressId
+                        
                         WHERE PersonID = @PersonID";
 
             using (SqlCommand cmd = new SqlCommand(UpdatePerson, OpenConnection))
             {
-                // Get your parameters ready                    
                 cmd.Parameters.AddWithValue("@FName", person.FirstName);
                 cmd.Parameters.AddWithValue("@MName", person.MiddleName);
                 cmd.Parameters.AddWithValue("@LName", person.LastName);
-                cmd.Parameters.AddWithValue("@AddressId", person.AddressID);
+                cmd.Parameters.AddWithValue("@AddressId", person.PrimaryAddress.AddressID);
+               
+                cmd.Parameters.AddWithValue("@PersonID", person.PersonID);
 
-                var Pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                var x = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record. Should be ExecuteNonQuery. 
             }
         }
 
@@ -242,16 +340,14 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         #endregion
 
         #endregion
-
-
+        
 
         // CRUD operation on an Alternative Address
-
         #region Create, Update, Delete an Alternative Address
 
         #region Create Alternative Address
 
-        public void CreateAddressDB(ref AlternativeAddress AA)
+        public void CreateAlternativeAddressDB(ref AlternativeAddress AA)
         {
             string CreateAltAddress = @"INSERT INTO [AlternativeAddress] (AAType, PersonID, AddressID)
                                                     OUTPUT INSERTED.AAID  
@@ -272,12 +368,12 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
         public void UpdateAlternativeAddressDB(ref AlternativeAddress AA)
         {
-            string UpdatePerson =
+            string UpdateAltAddr =
                 @"UPDATE AA
                         SET AAType = @AltAType, PersonID = @PersonId, AddressID = @AddressId
                         WHERE AAID = @AltAddressId";
 
-            using (SqlCommand cmd = new SqlCommand(UpdatePerson, OpenConnection))
+            using (SqlCommand cmd = new SqlCommand(UpdateAltAddr, OpenConnection))
             {
                 // Get your parameters ready                    
                 cmd.Parameters.AddWithValue("@AltAType", AA.AAType);
@@ -312,9 +408,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
         public List<AlternativeAddress> GetPersonAlternativeAddresses(ref Person person)
         {
-            var sqlcmd = @"SELECT  TOP * 
-                           FROM [AlternativeAddress] 
-                           WHERE ([Person] = @PID)";
+            var sqlcmd = @"SELECT TOP 1 * FROM [AlternativeAddress] WHERE ([Person] = @PID)";
             using (var cmd = new SqlCommand(sqlcmd, OpenConnection))
             {
                 cmd.Parameters.AddWithValue("@PID", person.PersonID);
@@ -346,7 +440,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
 
         // CRUD operation on a Telefon
-
         #region Create, Update, Delete a Telefon
 
         #region Create a Telefon
@@ -355,15 +448,15 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             string CreateTelefon = @"INSERT INTO [Telefon] (Number, PersonID, ProviderID, TelefonType)
                                                     OUTPUT INSERTED.TelefonID  
-                                                    VALUES (@TlfNr, @TlfType, @ProviderId, @PersonId)";
+                                                    VALUES (@TlfNr,@PersonId , @ProviderId, @TlfType)";
 
             using (SqlCommand cmd = new SqlCommand(CreateTelefon, OpenConnection))
             {
                 cmd.Parameters.AddWithValue("@TlfNr", tlf.Number);
-                cmd.Parameters.AddWithValue("@TlfType", tlf.TelefonType);
-                cmd.Parameters.AddWithValue("@ProviderId", tlf.ProviderID);
                 cmd.Parameters.AddWithValue("@PersonId", tlf.PersonID);
-                tlf.PersonID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+                cmd.Parameters.AddWithValue("@ProviderId", tlf.ProviderID);
+                cmd.Parameters.AddWithValue("@TlfType", tlf.TelefonType);
+                tlf.TelefonID = (int)cmd.ExecuteNonQuery(); 
             }
         }
 
@@ -374,16 +467,17 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         public void UpdateTelefonDB(ref Telefon tlf)
         {
             string UpdateTelefon =
-                @"UPDATE Telfeon
-                        SET Number = @TlfNr, TelefonType = @TlfType, ProviderID = @ProviderId, PersonID = @PersonId
+                @"UPDATE Telefon
+                        SET Number = @TlfNr, TelefonType = @TlfType, PersonID = @PersonId, ProviderID = @ProviderId
                         WHERE TelefonID = @TelefonId";
 
             using (SqlCommand cmd = new SqlCommand(UpdateTelefon, OpenConnection))
             {
                 cmd.Parameters.AddWithValue("@TlfNr", tlf.Number);
                 cmd.Parameters.AddWithValue("@TlfType", tlf.TelefonType);
-                cmd.Parameters.AddWithValue("@ProviderId", tlf.ProviderID);
                 cmd.Parameters.AddWithValue("@PersonId", tlf.PersonID);
+                cmd.Parameters.AddWithValue("@ProviderId", tlf.ProviderID);
+                cmd.Parameters.AddWithValue("@TelefonId", tlf.TelefonID);
 
                 var TlfId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
@@ -429,7 +523,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
                     var tlf = new Telefon
                     {
                         TelefonID = (int)rdr["TlfID"],
-                        Number = (string)rdr["TlfNumber"],
+                        Number = (long)rdr["TlfNumber"],
                         TelefonType = (string)rdr["TlfType"],
                         TelefonProvider = (Provider)rdr["TlfProvider"]
                     };
@@ -447,7 +541,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         #endregion
 
         // CRUD operation on a Provider
-
         #region Create, Update, Delete Provider
 
         #region Create a Provider
@@ -539,7 +632,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
 
         // CRUD operation on an Email 
-
         #region Create, Update, Delete an Email 
 
         #region Create Email
@@ -548,13 +640,13 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             string CreateEmail = @"INSERT INTO [Email] (EmailAddress, PersonID)
                                                     OUTPUT INSERTED.EmailID  
-                                                    VALUES ( @EimailAddress, @PersonID)";
+                                                    VALUES ( @EA, @PID)";
 
             using (SqlCommand cmd = new SqlCommand(CreateEmail, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@EmailAddress", email.EmailAddress);
-                cmd.Parameters.AddWithValue("@PersonID", email.PersonID);
-                email.EmailID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+                cmd.Parameters.AddWithValue("@EA", email.EmailAddress);
+                cmd.Parameters.AddWithValue("@PID", email.PersonID);
+                email.EmailID = (int)cmd.ExecuteNonQuery();
             }
         }
 
@@ -565,17 +657,18 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
         public void UpdateEmailDB(ref Email email)
         {
-            string UpdateTelefon =
-                @"UPDATE telfeon
-                        SET EmailAddress  = @email, PersonID = @PersonId
+            string UpdateTelefon = @"UPDATE Email
+                        SET  EmailAddress  = @email, PersonID = @PersonId
                         WHERE EmailID = @EmailID";
 
             using (SqlCommand cmd = new SqlCommand(UpdateTelefon, OpenConnection))
             {
+
                 cmd.Parameters.AddWithValue("@email", email.EmailAddress);
                 cmd.Parameters.AddWithValue("@PersonId", email.PersonID);
+                cmd.Parameters.AddWithValue("@EmailID", email.EmailID);
 
-                var emlId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                var em = (int)cmd.ExecuteNonQuery(); 
             }
         }
 
@@ -636,7 +729,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
 
         // CRUD operation on Notes 
-
         #region Create, Update, Delete Notes 
 
         #region Create Notes
@@ -651,7 +743,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
             {
                 cmd.Parameters.AddWithValue("@NotesText", notes.NotesText);
                 cmd.Parameters.AddWithValue("@PersonID", notes.PersonID);
-                notes.PersonID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+                notes.PersonID = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
         }
 
@@ -664,21 +756,22 @@ namespace Infrastructure.PersonkartotekDB.ADONET
         {
             string UpdateNotes =
                 @"UPDATE Notes
-                        SET NotesText = @NotesText PersonID = @PersonId
+                        SET NotesText = @NotesText, PersonID = @PersonId
                         WHERE NotesID = @NotesID";
 
             using (SqlCommand cmd = new SqlCommand(UpdateNotes, OpenConnection))
             {
                 cmd.Parameters.AddWithValue("@NotesText", notes.NotesText);
                 cmd.Parameters.AddWithValue("@PersonId", notes.PersonID);
+                cmd.Parameters.AddWithValue("@NotesID", notes.NotesID);
 
-                var noteId = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
+                var note = (int)cmd.ExecuteNonQuery();
             }
         }
 
         #endregion
 
-        #region Delete an Email
+        #region Delete Notes
 
         public void DeleteNotesDB(ref Notes notes)
         {
@@ -687,8 +780,8 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
             using (SqlCommand cmd = new SqlCommand(DeleteNotes, OpenConnection))
             {
-                // Get your parameters ready                    
-                cmd.Parameters.AddWithValue("@EmailID", notes.NotesID);
+
+                cmd.Parameters.AddWithValue("@NotesID", notes.NotesID);
 
                 var pid = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
                 notes = null;
@@ -732,7 +825,6 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
 
         // Overview of the Contact Person
-
         #region Get Person List with Complete Detail
 
         #region GetPersonList
@@ -773,7 +865,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
         #region Full tree for person - GetFullContactPersonTreeDB
 
-        public void GetFullContactPersonTreeDB(ref Person fcpt)
+        public void GetFullContactPersonTreeDB(ref Person p)
         {
             string fullPersonkartotek =
                 @"SELECT    Address.AddressID, Address.StreetName, Address.HouseNumber, 
@@ -798,7 +890,7 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
             using (SqlCommand cmd = new SqlCommand(fullPersonkartotek, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@PersonID", fcpt.PersonID);
+                cmd.Parameters.AddWithValue("@PersonID", p.PersonID);
                 SqlDataReader rdr = null;
                 rdr = cmd.ExecuteReader();
                 int personCount = 0;

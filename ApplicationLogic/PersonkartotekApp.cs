@@ -9,82 +9,108 @@ namespace ApplicationLogic
         public void ProgramApp()
         {
             PersonkartotekDBUtil personUtil = new PersonkartotekDBUtil();
-           
 
-            Address altA;
-            var primaryAddr = new Address() // primary address
+            City city = new City() // city
             {
+                CityID = 1,
+                CityName = "Aarhus",
+                Country = "DK",
+                PostNumber = "8000"
+            };
+            personUtil.CreateCityDB(ref city);
+
+            Address primaryAddr = new Address() // primary address
+            {
+                AddressID = 1,
                 StreetName = "Finlandsgade",
                 HouseNumber = "99",
-                Town = new City() { PostNumber = "8260" },
+                Town = city,
+               // CityID = city.CityID,
                 AlternativePerson = new List<AlternativeAddress>(),
                 PersonsPrimary = new List<Person>()
             };
 
-            Person newPerson = new Person() { PersonID = 1, FirstName = "Mike", MiddleName = "", LastName = "Moore", AddressID = 7 };
-            personUtil.CreatePersonDB(ref newPerson);
+            //Address altA = new Address() // alternavtive address
+            //{
+            //    StreetName = "Hilsinkigade",
+            //    HouseNumber = "11",
+            //    Town = new City() { PostNumber = "8260" },
+            //    AlternativePerson = new List<AlternativeAddress>()
+            //};
 
-            personUtil.GetFullContactPersonTreeDB(ref newPerson);
-            return;
 
-            Person person1 = new Person() { PersonID = 2, FirstName = "Michael", MiddleName = "", LastName = "Rasmussen", AddressID = 8, TelefonNumbers = null, Notes = null, Emails = null, };
-            personUtil.GetPersonByName(ref person1);
-            personUtil.CreatePersonDB(ref person1);
-
-           
-            primaryAddr.PersonsPrimary.Add(person1); // reference from Alt address to Person
-            AlternativeAddress altAdr;
-
-            person1.PrimaryAddress = primaryAddr; // reference from person to primary addresss
-
-            altAdr = new AlternativeAddress() // address 2 reference to alternative AAType
+            AlternativeAddress altAdr = new AlternativeAddress() // alternative
             {
+                AAID = 0,
                 AAType = "Bolig",
                 AddressID = 0,
                 PersonID = 0,
-                Persons = person1,
-                Address = altA
             };
 
-
-            altA = new Address() // alternavtive address
+            Email email = new Email() // email
             {
-                StreetName = "Hilsinkigade",
-                HouseNumber = "11",
-                Town = new City() { PostNumber = "8260" },
-                AlternativePerson = new List<AlternativeAddress>()
+                EmailID = 5,
+                EmailAddress = "example@personEmail.com",
+                PersonID = 11
             };
 
-
-            altA.AlternativePerson.Add(altAdr);
-
-            person1.AlternativeAddresses.Add(altAdr); // reference from person to ALT address
-
-            person1.PrimaryAddress = primaryAddr;
-
-            person1.AlternativeAddresses = personUtil.GetPersonAlternativeAddresses(ref person1);
-
-            #region Test 2
+            Notes notes = new Notes() // notes
+            {
+                NotesID = 7,
+                NotesText = "All the notes about this person comes soon...",
+                PersonID = 11
+            };
             
-            // test 2
+            Provider provider = new Provider() // telefon provider
+            {
+                ProviderID = 2,
+                ProviderName = "Telia"
+            };
+            
+            Telefon tlf = new Telefon() // Telefon
+            {
+                TelefonID = 26,
+                Number = 22663355,
+                TelefonType = "Private",
+                ProviderID = 2,
+                PersonID = 11,
+                TelefonProvider = provider
+            };
+            
 
-            /*
-            Person person2 = new Person() { PersonID = 1, FirstName = "Marie", MiddleName = "", LastName = "Lorie", AddressID=8};
-            personUtil.CreatePersonDB(ref person2);
+           // Creating section
+            personUtil.CreateAddressDB(ref primaryAddr);
+            personUtil.CreateAlternativeAddressDB(ref altAdr); // dette giver error
+            personUtil.CreateEmailDB(ref email);
+            personUtil.CreateNotesDB(ref notes);
+            personUtil.CreateTelefonDB(ref tlf);
 
-            Address person2Address =
-                new Address() { AddressID = 1, StreetName = "Herningvej", HouseNumber = "1, 2th", CityID = 1 };
-            personUtil.CreateAddressDB(ref person2Address);
+            Person newPerson = new Person() { PersonID = 0, FirstName = "Martin", MiddleName = "", LastName = "Moore",
+                                                AddressID = 1, PrimaryAddress =primaryAddr, Emails = email, Notes = notes};
 
-            AlternativeAddress person2AlternativeAddress =
-                new AlternativeAddress() { AAID = 1, AAType = "Work", PersonID = 1 };
-            personUtil.UpdateAlternativeAddressDB(ref person2AlternativeAddress);
+            personUtil.CreatePersonDB(ref newPerson);
 
-            personUtil.GetFullContactPersonTreeDB(ref person2);
+           
+            // Update section
+            personUtil.UpdateAddressDB(ref primaryAddr);
+            personUtil.UpdateAlternativeAddressDB(ref altAdr); // error
+            personUtil.UpdateEmailDB(ref email);
+            personUtil.UpdateNotesDB(ref notes);
+            personUtil.UpdateTelefonDB(ref tlf);
+            personUtil.UpdatePersonDB(ref newPerson);
+
+            // Delete section
+            personUtil.DeletePersonDB(ref newPerson);
+            personUtil.DeleteTelefonDB(ref tlf);
+            personUtil.DeleteNotesDB(ref notes);
+            personUtil.DeleteEmailDB(ref email);
+            personUtil.DeleteAlternativeAddressDB(ref altAdr); // error
+            personUtil.DeleteAddressDB(ref primaryAddr);
+
+
+            personUtil.GetFullContactPersonTreeDB(ref newPerson); // error
+
             return;
-            */
-
-            #endregion
         }
     }
 }
