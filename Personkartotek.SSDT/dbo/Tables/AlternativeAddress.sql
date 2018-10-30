@@ -11,7 +11,8 @@ CREATE TABLE AlternativeAddress (
     PersonID       BIGINT NOT NULL,
     AddressID      BIGINT NOT NULL,
     AAType         NVARCHAR(50) NOT NULL,
-CONSTRAINT pk_AlternativeAddress PRIMARY KEY CLUSTERED (PersonID,AddressID),
+[AAID] BIGINT NOT NULL, 
+    CONSTRAINT pk_AlternativeAddress PRIMARY KEY CLUSTERED ([AAID]),
 CONSTRAINT fk_AlternativeAddress FOREIGN KEY (PersonID)
     REFERENCES Person (PersonID)
     ON DELETE NO ACTION

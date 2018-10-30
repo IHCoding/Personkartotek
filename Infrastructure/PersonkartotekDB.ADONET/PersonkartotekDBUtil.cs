@@ -349,16 +349,16 @@ namespace Infrastructure.PersonkartotekDB.ADONET
 
         public void CreateAlternativeAddressDB(ref AlternativeAddress AA)
         {
-            string CreateAltAddress = @"INSERT INTO [AlternativeAddress] (AAType, PersonID, AddressID)
+            string CreateAltAddress = @"INSERT INTO [AlternativeAddress] (PersonID, AddressID, AAType)
                                                     OUTPUT INSERTED.AAID  
                                                     VALUES (@AltAType, @PersonId, @AddressId)";
 
             using (SqlCommand cmd = new SqlCommand(CreateAltAddress, OpenConnection))
             {
-                cmd.Parameters.AddWithValue("@AltAType", AA.AAType);
                 cmd.Parameters.AddWithValue("@PersonId", AA.PersonID);
                 cmd.Parameters.AddWithValue("@AddressId", AA.AddressID);
-                AA.AAID = (int)cmd.ExecuteScalar(); //Returns the identity of the new tuple/record
+                cmd.Parameters.AddWithValue("@AltAType", AA.AAType);
+                AA.AAID = (int)cmd.ExecuteNonQuery(); //Returns the identity of the new tuple/record
             }
         }
 

@@ -29,24 +29,7 @@ namespace ApplicationLogic
                 AlternativePerson = new List<AlternativeAddress>(),
                 PersonsPrimary = new List<Person>()
             };
-
-            //Address altA = new Address() // alternavtive address
-            //{
-            //    StreetName = "Hilsinkigade",
-            //    HouseNumber = "11",
-            //    Town = new City() { PostNumber = "8260" },
-            //    AlternativePerson = new List<AlternativeAddress>()
-            //};
-
-
-            AlternativeAddress altAdr = new AlternativeAddress() // alternative
-            {
-                AAID = 0,
-                AAType = "Bolig",
-                AddressID = 0,
-                PersonID = 0,
-            };
-
+            
             Email email = new Email() // email
             {
                 EmailID = 5,
@@ -78,37 +61,51 @@ namespace ApplicationLogic
             };
             
 
-           // Creating section
+            // Create section
             personUtil.CreateAddressDB(ref primaryAddr);
-            personUtil.CreateAlternativeAddressDB(ref altAdr); // dette giver error
             personUtil.CreateEmailDB(ref email);
             personUtil.CreateNotesDB(ref notes);
             personUtil.CreateTelefonDB(ref tlf);
 
-            Person newPerson = new Person() { PersonID = 0, FirstName = "Martin", MiddleName = "", LastName = "Moore",
+            Person Father = new Person() { PersonID = 0, FirstName = "Martin", MiddleName = "", LastName = "Moore",
                                                 AddressID = 1, PrimaryAddress =primaryAddr, Emails = email, Notes = notes};
 
-            personUtil.CreatePersonDB(ref newPerson);
+            personUtil.CreatePersonDB(ref Father);
 
-           
+            Person Son = new Person() { PersonID = 2, FirstName = "Michael", MiddleName = "", LastName = "Rasmussen", AddressID = 2, TelefonNumbers = null, Notes = null, Emails = null, };
+
+            AlternativeAddress altAdr = new AlternativeAddress() // alternavtive address /address 2 reference to alternative AAType
+            {
+                AAID = 0,
+                AAType = "Bolig",
+                AddressID = 1,
+                PersonID = 0,
+                Persons = Son,
+                Address = primaryAddr
+            };
+
+            
+            primaryAddr.PersonsPrimary.Add(Son); // reference from address to Person
+            Son.PrimaryAddress = primaryAddr; // reference from person to primary addresss
+            Son.AlternativeAddresses.Add(altAdr); // reference from person to ALT address
+            Son.PrimaryAddress = primaryAddr;
+            personUtil.CreateAlternativeAddressDB(ref altAdr);
+
+
             // Update section
             personUtil.UpdateAddressDB(ref primaryAddr);
-            personUtil.UpdateAlternativeAddressDB(ref altAdr); // error
             personUtil.UpdateEmailDB(ref email);
             personUtil.UpdateNotesDB(ref notes);
             personUtil.UpdateTelefonDB(ref tlf);
-            personUtil.UpdatePersonDB(ref newPerson);
+            personUtil.UpdatePersonDB(ref Father);
+            primaryAddr.PersonsPrimary.Add(Father); // reference from Alt address to Person
 
             // Delete section
-            personUtil.DeletePersonDB(ref newPerson);
+            personUtil.DeletePersonDB(ref Father);
             personUtil.DeleteTelefonDB(ref tlf);
             personUtil.DeleteNotesDB(ref notes);
             personUtil.DeleteEmailDB(ref email);
-            personUtil.DeleteAlternativeAddressDB(ref altAdr); // error
             personUtil.DeleteAddressDB(ref primaryAddr);
-
-
-            personUtil.GetFullContactPersonTreeDB(ref newPerson); // error
 
             return;
         }
